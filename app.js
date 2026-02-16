@@ -576,36 +576,55 @@ function endGame() {
   });
 }
 
-// --- KUSURSUZ ÇİFT YÖNLÜ ÖLÇEKLEME ---
+// --- KUSURSUZ MOBİL VE PC ÇİFT YÖNLÜ ÖLÇEKLEME ---
 function autoScaleGame() {
     const gameArea = document.getElementById('gameArea');
-    if (!gameArea) return;
+    const gameScreen = document.getElementById('gameScreen');
+    if (!gameArea || !gameScreen) return;
 
-    const windowWidth = window.innerWidth;
+    // Ekranda (özellikle mobilde) net genişliği bul
+    let containerWidth = gameScreen.clientWidth;
+    if (containerWidth === 0) containerWidth = window.innerWidth; 
+    
     const windowHeight = window.innerHeight; 
     
     const designWidth = 1200; 
     const designHeight = 700; 
 
-    // Ekranın üst kısmındaki menüler için 200px güvenlik boşluğu
-    const availableWidth = windowWidth - 40; 
-    const availableHeight = windowHeight - 200; 
+    // Mobilde üst taraftaki yazılar katlanıp alt alta indiği için dikey payı artırıyoruz
+    const headerSpace = containerWidth < 768 ? 280 : 200; 
+    const availableWidth = containerWidth - 20; 
+    const availableHeight = windowHeight - headerSpace; 
 
     const scaleX = availableWidth / designWidth;
     const scaleY = availableHeight / designHeight;
 
-    // Hem enine hem boyuna bak, hangisi dar ise ona göre küçült
+    // Hangisi darsa ona göre küçült
     const scale = Math.min(scaleX, scaleY, 1); 
 
+    // İŞTE MOBİLDEKİ GÖRÜNMEZLİK SORUNUNU ÇÖZEN SİHİRLİ KISIM:
+    // Flexbox'ın mobilde alanı dışarı taşırmasını engellemek için
+    // elemanı zorla en sola yaslayıp (flex-start), jilet gibi hesaplayarak ortaya itiyoruz.
     gameArea.style.position = 'relative';
-    gameArea.style.left = 'auto'; 
-    gameArea.style.transformOrigin = 'top center';
-    gameArea.style.transform = `scale(${scale})`;
+    gameArea.style.alignSelf = 'flex-start'; // Sola sıfırla
+    
+    const scaledWidth = designWidth * scale;
+    
+    // Tam ortaya gelmesi için soldan ne kadar itileceğini hesapla:
+    const pushRight = (containerWidth - scaledWidth) / 2;
 
+    // Sol üstten tutarak küçült ve hesaplanan değer kadar sağa it
+    gameArea.style.transformOrigin = 'top left'; 
+    gameArea.style.transform = `translate(${pushRight}px, 0) scale(${scale})`;
+
+    // Alt taraftaki hayalet boşluğu yok et
     const scaledHeight = designHeight * scale;
     const emptySpace = designHeight - scaledHeight;
 
-    gameArea.style.margin = `10px auto -${emptySpace}px auto`; 
+    gameArea.style.marginTop = '10px';
+    gameArea.style.marginBottom = `-${emptySpace}px`; 
+    gameArea.style.marginLeft = '0px';
+    gameArea.style.marginRight = '0px';
 }
 
 window.addEventListener('resize', autoScaleGame);
