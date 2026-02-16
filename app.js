@@ -116,8 +116,14 @@ function createLine(id) {
   line.id = `line${id}`;
   
   line.style.position = 'absolute'; 
-  line.style.width = '130px';    
-  line.style.height = '5px';     
+
+  // --- DEĞİŞEN KISIM BURASI ---
+  // Ekran genişliği 768px'den küçükse (telefon) 180px, değilse 140px yap
+  const dinamikGelislik = window.innerWidth < 768 ? '180px' : '140px';
+  line.style.width = dinamikGelislik;
+  // ----------------------------
+
+  line.style.height = '6px'; // Mobilde daha rahat tutulsun diye 1 tık kalınlaştırdım
   line.style.cursor = 'grab';
   line.style.zIndex = (10 + id).toString();
 
